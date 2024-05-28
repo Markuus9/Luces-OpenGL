@@ -20,8 +20,15 @@ class A3GLWidget : public MyGLWidget
 #define HORA_MAX 20
 #define NUM_FOCUS_FAR 2
 
+  public slots:
+    void updateTime(int Time);
+  signals:
+		void setTime(int);
+
+
   private:
     int horaActual = 14;
+    float rotacioFar = 0.0;
 
   public:
     A3GLWidget (QWidget *parent=0);
@@ -33,6 +40,7 @@ class A3GLWidget : public MyGLWidget
     void modelTransformFar2();
     void modelTransformVaixell();
     void solTransform();
+    void llumFarTransform();
     void iniEscena ();
     void carregaShaders();
 
@@ -40,7 +48,7 @@ class A3GLWidget : public MyGLWidget
     virtual void keyPressEvent (QKeyEvent *event);
     //--------------------------------------------------------------
     // uniform locations
-    GLuint normalMatrixLoc, colorLlumLoc, posLlumLoc, llumAmbientLoc;
+    GLuint normalMatrixLoc, colorLlumLoc, posLlumLoc, llumAmbientLoc, llumsFarLoc[2], colorLlumFarLoc;
     //--------------------------------------------------------------
     // Posicions
     glm::vec3 VaixellPos;

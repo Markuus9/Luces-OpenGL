@@ -22,6 +22,10 @@ uniform mat3 NM;
 uniform vec3 colorFocus;
 //uniform vec4 posFocusSCO;
 uniform vec3 llumAmbient;
+uniform vec3 colorLlumFar;
+uniform vec4 posLlumsFarLoc1;
+uniform vec4 posLlumsFarLoc2;
+
 
 vec3 Ambient() {
     return llumAmbient * o_matamb;
@@ -85,13 +89,20 @@ void main()
 	
 	vec4 posFocusSCO = o_posFocus; 
 	vec3 NormSCO = normalize(o_normal_sco);
+
 	vec4 LSCO = normalize(posFocusSCO - o_vertex_sco);
 	vec3 Ld = Difus(NormSCO, LSCO.xyz, colorFocus);
-	
 	vec3 Le = Especular(NormSCO, LSCO.xyz, o_vertex_sco, colorFocus);
 	
-	//FragColor = vec4(fcolor,1);
-	FragColor = La + Ld + Le;
+  //LlumFar1
+	vec4 LSCO2 = normalize(posLlumsFarLoc1 - o_vertex_sco);
+	vec3 Ld2 = Difus(NormSCO, LSCO2.xyz, colorLlumFar);
+	vec3 Le2 = Especular(NormSCO, LSCO2.xyz, o_vertex_sco, colorLlumFar);
+  //LlumFar2
+  vec4 LSCO3 = normalize(posLlumsFarLoc2 - o_vertex_sco);
+	vec3 Ld3 = Difus(NormSCO, LSCO3.xyz, colorLlumFar);
+	vec3 Le3 = Especular(NormSCO, LSCO3.xyz, o_vertex_sco, colorLlumFar);
 
+	FragColor = La + Ld + Le + Ld2 + Le2 + Ld3 + Le3;
 }
 

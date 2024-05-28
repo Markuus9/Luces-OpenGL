@@ -50,6 +50,7 @@ void A3GLWidget::paintGL ()
 	projectTransform ();
 	viewTransform ();
 	solTransform();
+	llumFarTransform();
 	// Esborrem el frame-buffer i el depth-buffer
 
 	glClearColor(0.8f, 0.8f, 1.0f, 1.f);
@@ -106,6 +107,15 @@ void A3GLWidget::solTransform()
   glUniform4fv(posLlumLoc, 1, &pSol[0]);
 }
 
+void A3GLWidget::llumFarTransform(){
+  glm::vec4 llum1 = View * Far2_TG * glm::vec4(0.363f,4.695f,0.357f, 1.0f);
+  glm::vec4 llum2 = View * Far2_TG * glm::vec4(-0.357f,4.695f,-0.348f, 1.0f);
+  glm::vec3 colorLlum = glm::vec3(1.0,1.0,1.0);
+  glUniform3fv(colorLlumFarLoc, 1, &colorLlum[0]);
+  glUniform4fv(llumsFarLoc[0], 1, &llum1[0]);
+  glUniform4fv(llumsFarLoc[1], 1, &llum2[0]);
+}
+
 
 void A3GLWidget::modelTransformFar1()
 {
@@ -127,6 +137,7 @@ void A3GLWidget::modelTransformFar2()
 	Far2_TG = glm::mat4(1.0f);
 	Far2_TG = glm::translate(Far2_TG, glm::vec3(2, 1, 4));
 	Far2_TG = glm::scale(Far2_TG, glm::vec3(escalaModels[FAR_1]) );
+	Far2_TG = glm::rotate(Far2_TG, glm::radians(rotacioFar), glm::vec3(0,1,0));
 	Far2_TG = glm::translate(Far2_TG, -centreBaseModels[FAR_1]);
 	glUniformMatrix4fv(transLoc, 1, GL_FALSE, &Far2_TG[0][0]);
 	
@@ -152,14 +163,26 @@ void A3GLWidget::modelTransformVaixell()
   glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, &NormalMatrix[0][0]);
 }
 
-
+void A3GLWidget::updateTime(int Time){
+	makeCurrent();
+	horaActual = Time;
+	emit setTime(horaActual);
+	update();
+}
 
 void A3GLWidget::keyPressEvent(QKeyEvent* event)
 {
 	makeCurrent();
 
 	switch (event->key()) {
-
+		case Qt::Key_A: {
+			rotacioFar += 10;
+			break;
+		}
+		case Qt::Key_D: {
+			rotacioFar -= 10;
+			break;
+		}
 		case Qt::Key_S: {
 			VaixellPos[2]+=1;break;
 		}
@@ -167,18 +190,18 @@ void A3GLWidget::keyPressEvent(QKeyEvent* event)
 			VaixellPos[2]-=1;break;
 		}
 		case Qt::Key_Up:
-      if (horaActual < 20) {
-          horaActual++;
-          //solTransform();
-      }
-      break;
-    case Qt::Key_Down:
-      if (horaActual > 8) {
-          horaActual--;
-          //solTransform();
-      }
-      break;
-		default: event->ignore(); break;
+			if (horaActual < 20) {
+				horaActual++;
+				emit setTime(horaActual);
+			}
+			break;
+		case Qt::Key_Down:
+			if (horaActual > 8) {
+				horaActual--;
+				emit setTime(horaActual);
+			}
+		break;
+	default: event->ignore(); break;
 	}
 	update();
 }
@@ -221,8 +244,11 @@ void A3GLWidget::carregaShaders()
 	viewLoc = glGetUniformLocation (program->programId(), "view");
 	normalMatrixLoc = glGetUniformLocation (program->programId(), "NM");
 	colorLlumLoc = glGetUniformLocation (program->programId(), "colorFocus");
-  posLlumLoc = glGetUniformLocation (program->programId(), "posFocusSCO");
-  llumAmbientLoc = glGetUniformLocation (program->programId(), "llumAmbient");
+  	posLlumLoc = glGetUniformLocation (program->programId(), "posFocusSCO");
+  	llumAmbientLoc = glGetUniformLocation (program->programId(), "llumAmbient");
+	llumsFarLoc[0] = glGetUniformLocation (program->programId(), "posLlumsFarLoc1");
+	llumsFarLoc[1] = glGetUniformLocation (program->programId(), "posLlumsFarLoc2");
+	colorLlumFarLoc = glGetUniformLocation (program->programId(), "colorLlumFar");
 
 	// Bloc d'uniforms
 	// .... Enjoy !

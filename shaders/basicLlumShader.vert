@@ -15,6 +15,9 @@ uniform mat3 NM;
 uniform vec3 colorFocus;
 uniform vec4 posFocusSCO;
 uniform vec3 llumAmbient;
+uniform vec3 colorLlumFar;
+uniform vec4 posLlumsFarLoc1;
+uniform vec4 posLlumsFarLoc2;
 
 out vec3 fcolor;
 
