@@ -20,6 +20,9 @@ class A3GLWidget : public MyGLWidget
 #define HORA_MAX 20
 #define NUM_FOCUS_FAR 2
 
+  private:
+    int horaActual = 14;
+
   public:
     A3GLWidget (QWidget *parent=0);
     ~A3GLWidget ();
@@ -29,6 +32,7 @@ class A3GLWidget : public MyGLWidget
     void modelTransformFar1();
     void modelTransformFar2();
     void modelTransformVaixell();
+    void solTransform();
     void iniEscena ();
     void carregaShaders();
 

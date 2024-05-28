@@ -13,7 +13,7 @@ in float o_matshin;
 //in vec3 o_colorFocus;
 in vec4 o_posFocus;
 
-out vec4 FragColor;
+out vec3 FragColor;
 
 uniform mat4 proj;
 uniform mat4 view;
@@ -83,7 +83,7 @@ void main()
 {	
 	vec3 La = Ambient();
 	
-	vec4 posFocusSCO = o_posFocus; // posar view * vec4 (o_posFocus, 1.0) si la llum no prové de l'observador
+	vec4 posFocusSCO = o_posFocus; 
 	vec3 NormSCO = normalize(o_normal_sco);
 	vec4 LSCO = normalize(posFocusSCO - o_vertex_sco);
 	vec3 Ld = Difus(NormSCO, LSCO.xyz, colorFocus);
@@ -91,7 +91,7 @@ void main()
 	vec3 Le = Especular(NormSCO, LSCO.xyz, o_vertex_sco, colorFocus);
 	
 	//FragColor = vec4(fcolor,1);
-	FragColor = vec4(La + Ld + Le, 1);
+	FragColor = La + Ld + Le;
 
 }
 

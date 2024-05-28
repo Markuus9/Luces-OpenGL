@@ -25,10 +25,9 @@ void A3GLWidget::iniEscena ()
 	
   glm::vec3 llumAmbient = glm::vec3(0.1,0.1,0.1);
   glUniform3fv(llumAmbientLoc, 1, &llumAmbient[0]);
+  
   glm::vec3 colorLlum = glm::vec3(0.6,0.6,0.6);
   glUniform3fv(colorLlumLoc, 1, &colorLlum[0]);
-  glm::vec3 posLlum = glm::vec3(0, 40, 0);
-  glUniform3fv(posLlumLoc, 1, &posLlum[0]);
   
 }
 
@@ -50,6 +49,7 @@ void A3GLWidget::paintGL ()
 
 	projectTransform ();
 	viewTransform ();
+	solTransform();
 	// Esborrem el frame-buffer i el depth-buffer
 
 	glClearColor(0.8f, 0.8f, 1.0f, 1.f);
@@ -96,6 +96,16 @@ void A3GLWidget::paintGL ()
 
 	glBindVertexArray(0);
 }
+
+void A3GLWidget::solTransform()
+{
+  float rotacio = (14.0f-float(horaActual))*15.0f;
+  glm::mat4 TG = glm::mat4(1.0f);
+  TG = glm::rotate(TG, glm::radians(rotacio), glm::vec3(0,0,1));
+  glm::vec4 pSol = View * TG * glm::vec4(0.0f, 40.0f, 0.0f, 1.0f);
+  glUniform4fv(posLlumLoc, 1, &pSol[0]);
+}
+
 
 void A3GLWidget::modelTransformFar1()
 {
@@ -156,6 +166,18 @@ void A3GLWidget::keyPressEvent(QKeyEvent* event)
 		case Qt::Key_W: {
 			VaixellPos[2]-=1;break;
 		}
+		case Qt::Key_Up:
+      if (horaActual < 20) {
+          horaActual++;
+          //solTransform();
+      }
+      break;
+    case Qt::Key_Down:
+      if (horaActual > 8) {
+          horaActual--;
+          //solTransform();
+      }
+      break;
 		default: event->ignore(); break;
 	}
 	update();
