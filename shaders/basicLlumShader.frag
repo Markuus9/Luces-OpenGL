@@ -94,14 +94,35 @@ void main()
 	vec3 Ld = Difus(NormSCO, LSCO.xyz, colorFocus);
 	vec3 Le = Especular(NormSCO, LSCO.xyz, o_vertex_sco, colorFocus);
 	
-  //LlumFar1
-	vec4 LSCO2 = normalize(posLlumsFarLoc1 - o_vertex_sco);
-	vec3 Ld2 = Difus(NormSCO, LSCO2.xyz, colorLlumFar);
-	vec3 Le2 = Especular(NormSCO, LSCO2.xyz, o_vertex_sco, colorLlumFar);
-  //LlumFar2
-  vec4 LSCO3 = normalize(posLlumsFarLoc2 - o_vertex_sco);
-	vec3 Ld3 = Difus(NormSCO, LSCO3.xyz, colorLlumFar);
-	vec3 Le3 = Especular(NormSCO, LSCO3.xyz, o_vertex_sco, colorLlumFar);
+  // LlumFar1
+  vec4 LSCO2 = posLlumsFarLoc1 - o_vertex_sco;
+  vec4 Dir1 = posLlumsFarLoc2 - posLlumsFarLoc1;
+  LSCO2 = normalize(LSCO2);
+  Dir1 = normalize(Dir1);
+
+  float cosAngle1 = Dir1.x * (-LSCO2.x) + Dir1.y * (-LSCO2.y) + Dir1.z * (-LSCO2.z);
+  float atenuacio1 = pow(cosAngle1, 4.0);
+  vec3 Ld2 = vec3(0.0f);
+  vec3 Le2 = vec3(0.0f);
+  if (cosAngle1 > 0.0) {
+      Ld2 = Difus(NormSCO, LSCO2.xyz, colorLlumFar) * atenuacio1;
+      Le2 = Especular(NormSCO, LSCO2.xyz, o_vertex_sco, colorLlumFar) * atenuacio1;
+  }
+
+  // LlumFar2
+  vec4 LSCO3 = posLlumsFarLoc2 - o_vertex_sco;
+  vec4 Dir2 = posLlumsFarLoc1 - posLlumsFarLoc2;
+  LSCO3 = normalize(LSCO3);
+  Dir2 = normalize(Dir2);
+
+  float cosAngle2 = Dir2.x * (-LSCO3.x) + Dir2.y * (-LSCO3.y) + Dir2.z * (-LSCO3.z);
+  float atenuacio2 = pow(cosAngle2, 4.0);
+  vec3 Ld3 = vec3(0.0f);
+  vec3 Le3 = vec3(0.0f);
+  if (cosAngle2 > 0.0) {
+      Ld3 = Difus(NormSCO, LSCO3.xyz, colorLlumFar) * atenuacio2;
+      Le3 = Especular(NormSCO, LSCO3.xyz, o_vertex_sco, colorLlumFar) * atenuacio2;
+  }
 
 	FragColor = La + Ld + Le + Ld2 + Le2 + Ld3 + Le3;
 }
