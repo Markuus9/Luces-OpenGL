@@ -1,5 +1,4 @@
 #include "A3GLWidget.h"
-
 #include <iostream>
 
 A3GLWidget::A3GLWidget (QWidget* parent) : MyGLWidget(parent)
@@ -29,6 +28,9 @@ void A3GLWidget::iniEscena ()
   glm::vec3 colorLlum = glm::vec3(0.6,0.6,0.6);
   glUniform3fv(colorLlumLoc, 1, &colorLlum[0]);
   
+  for(int i = 0; i < 6; i++){
+    estatTorxa[i] = true;
+  }
 }
 
 
@@ -46,11 +48,12 @@ void A3GLWidget::paintGL ()
 	// useu els paràmetres que considereu (els que hi ha són els de per defecte)
 	//  glViewport (0, 0, ample, alt);
 
-
 	projectTransform ();
 	viewTransform ();
 	solTransform();
 	llumFarTransform();
+	llumsVaixellTransform();
+
 	// Esborrem el frame-buffer i el depth-buffer
 
 	glClearColor(0.8f, 0.8f, 1.0f, 1.f);
@@ -62,6 +65,7 @@ void A3GLWidget::paintGL ()
 	// Activem el VAO per a pintar el vaixell
 	glBindVertexArray (VAO_models[VAIXELL]);
 	// Transformació geometrica
+	glUniform1i(isDrawingSeaLoc, 0);
 	modelTransformVaixell();
 	// pintem el vaixell
 	glDrawArrays(GL_TRIANGLES, 0, models[VAIXELL].faces().size()*3);
@@ -69,28 +73,33 @@ void A3GLWidget::paintGL ()
 	// Activem el VAO per a pintar el moll
 	glBindVertexArray (VAO_models[MOLL]);
 	// pintem les espelmes, cadascuna amb el seu transform
+	glUniform1i(isDrawingSeaLoc, 0);
 	modelTransformMoll();
 	glDrawArrays(GL_TRIANGLES, 0, models[MOLL].faces().size()*3);
 	//--------------------------------------------------------
 	// Activem el VAO per a pintar el far (primera part)
 	glBindVertexArray (VAO_models[FAR_1]);
 	// pintem les espelmes, cadascuna amb el seu transform
+	glUniform1i(isDrawingSeaLoc, 0);
 	modelTransformFar1();
 	glDrawArrays(GL_TRIANGLES, 0, models[FAR_1].faces().size()*3);
 	//--------------------------------------------------------
 	// Activem el VAO per a pintar el far (segona part)
 	glBindVertexArray (VAO_models[FAR_2]);
 	// pintem les espelmes, cadascuna amb el seu transform
+	glUniform1i(isDrawingSeaLoc, 0);
 	modelTransformFar2();
 	glDrawArrays(GL_TRIANGLES, 0, models[FAR_2].faces().size()*3);
 	//------------------------------------------------------------
 	//Pintem terra
 	glBindVertexArray (VAO_Terra);
+	glUniform1i(isDrawingSeaLoc, 0);
 	modelTransformTerra();
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	// Pintem Mar
 	glBindVertexArray (VAO_Mar);
+	glUniform1i(isDrawingSeaLoc, 1);
 	modelTransformMar();
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	//--------------------------------------------------------
@@ -116,6 +125,41 @@ void A3GLWidget::llumFarTransform(){
   glUniform4fv(llumsFarLoc[1], 1, &llum2[0]);
 }
 
+void A3GLWidget::llumsVaixellTransform(){
+  glm::vec4 posFocusTorxes[6];
+  if(estatTorxa[0] == true){
+    posFocusTorxes[0] = View * Vaixell_TG * glm::vec4(-7.39f, 1.95f,-6.68f, 1.0f);
+  } else {
+    posFocusTorxes[0] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  if(estatTorxa[1] == true){
+    posFocusTorxes[1] = View * Vaixell_TG * glm::vec4(-9.95f, 1.95f,-0.56f, 1.0f);
+  } else {
+    posFocusTorxes[1] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  if(estatTorxa[2] == true){
+    posFocusTorxes[2] = View * Vaixell_TG * glm::vec4(-7.47f, 1.95f, 5.64f, 1.0f);
+  } else {
+    posFocusTorxes[2] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  if(estatTorxa[3] == true){
+    posFocusTorxes[3] = View * Vaixell_TG * glm::vec4(4.38, 1.95, 5.26, 1.0f);
+  } else {
+    posFocusTorxes[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  if(estatTorxa[4] == true){
+    posFocusTorxes[4] = View * Vaixell_TG * glm::vec4(6.68, 1.95, 0.38, 1.0f);
+  } else {
+    posFocusTorxes[4] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  if(estatTorxa[5] == true){
+    posFocusTorxes[5] = View * Vaixell_TG * glm::vec4(4.15, 1.95,-6.97, 1.0f);
+  } else {
+    posFocusTorxes[5] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  glUniform3fv(colorLlumsVaixellLoc, 1, &colorLlums[0]);
+  glUniform4fv(llumsVaixellLoc, 6,  &posFocusTorxes[0][0]);
+}
 
 void A3GLWidget::modelTransformFar1()
 {
@@ -127,7 +171,8 @@ void A3GLWidget::modelTransformFar1()
 	glUniformMatrix4fv(transLoc, 1, GL_FALSE, &TG[0][0]);
 	
 	glm::mat3 NormalMatrix = glm::inverse(glm::transpose(glm::mat3(View*TG)));
-  glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, &NormalMatrix[0][0]);
+  //glUniform4fv(normalMatrixLoc, 1, GL_FALSE, &NormalMatrix[0][0]);
+  glUniform4fv(normalMatrixLoc, 1, &NormalMatrix[0][0]);
 	
 }
 
@@ -163,11 +208,62 @@ void A3GLWidget::modelTransformVaixell()
   glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, &NormalMatrix[0][0]);
 }
 
+//Slots
 void A3GLWidget::updateTime(int Time){
 	makeCurrent();
 	horaActual = Time;
 	emit setTime(horaActual);
 	update();
+}
+void A3GLWidget::updateTorxa1(){
+	makeCurrent();
+	estatTorxa[0] = !estatTorxa[0];
+	update();
+}
+void A3GLWidget::updateTorxa2(){
+	makeCurrent();
+	estatTorxa[1] = !estatTorxa[1];
+	update();
+}
+void A3GLWidget::updateTorxa3(){
+	makeCurrent();
+	estatTorxa[2] = !estatTorxa[2];
+	update();
+}
+void A3GLWidget::updateTorxa4(){
+	makeCurrent();
+	estatTorxa[3] = !estatTorxa[3];
+	update();
+}
+void A3GLWidget::updateTorxa5(){
+	makeCurrent();
+	estatTorxa[4] = !estatTorxa[4];
+	update();
+}
+void A3GLWidget::updateTorxa6(){
+	makeCurrent();
+	estatTorxa[5] = !estatTorxa[5];
+	update();
+}
+void A3GLWidget::updateColorVermell(){
+  makeCurrent();
+  colorLlums = glm::vec3(1.0, 0.0, 0.0); 
+  update();
+}
+void A3GLWidget::updateColorGroc(){
+  makeCurrent();
+  colorLlums = glm::vec3(1.0, 1.0, 0.0); 
+  update();
+}
+void A3GLWidget::updateColorVioleta(){
+  makeCurrent();
+  colorLlums = glm::vec3(1.0, 0.0, 1.0); 
+  update();
+}
+void A3GLWidget::updateColorVerd(){
+  makeCurrent();
+  colorLlums = glm::vec3(0.0, 1.0, 0.0); 
+  update();
 }
 
 void A3GLWidget::keyPressEvent(QKeyEvent* event)
@@ -244,12 +340,15 @@ void A3GLWidget::carregaShaders()
 	viewLoc = glGetUniformLocation (program->programId(), "view");
 	normalMatrixLoc = glGetUniformLocation (program->programId(), "NM");
 	colorLlumLoc = glGetUniformLocation (program->programId(), "colorFocus");
-  	posLlumLoc = glGetUniformLocation (program->programId(), "posFocusSCO");
-  	llumAmbientLoc = glGetUniformLocation (program->programId(), "llumAmbient");
+  posLlumLoc = glGetUniformLocation (program->programId(), "posFocusSCO");
+  llumAmbientLoc = glGetUniformLocation (program->programId(), "llumAmbient");
 	llumsFarLoc[0] = glGetUniformLocation (program->programId(), "posLlumsFarLoc1");
 	llumsFarLoc[1] = glGetUniformLocation (program->programId(), "posLlumsFarLoc2");
 	colorLlumFarLoc = glGetUniformLocation (program->programId(), "colorLlumFar");
+  colorLlumsVaixellLoc = glGetUniformLocation (program->programId(), "colorLlumsVaixell");
+  llumsVaixellLoc = glGetUniformLocation (program->programId(), "posFocusTorxes");
+  isDrawingSeaLoc = glGetUniformLocation(program->programId(), "isDrawingSea");
 
 	// Bloc d'uniforms
 	// .... Enjoy !
-}
+} 

@@ -13,6 +13,8 @@ in float o_matshin;
 //in vec3 o_colorFocus;
 in vec4 o_posFocus;
 
+flat in int DrawWaves;
+
 out vec3 FragColor;
 
 uniform mat4 proj;
@@ -25,6 +27,9 @@ uniform vec3 llumAmbient;
 uniform vec3 colorLlumFar;
 uniform vec4 posLlumsFarLoc1;
 uniform vec4 posLlumsFarLoc2;
+uniform vec4 posFocusTorxes[6];
+uniform vec3 colorLlumsVaixell;
+uniform int isDrawingSea;
 
 
 vec3 Ambient() {
@@ -86,9 +91,18 @@ vec3 WaveNormal(vec2 waveDirNN, float waveLength, vec3 vertex_world, float time)
 void main()
 {	
 	vec3 La = Ambient();
-	
-	vec4 posFocusSCO = o_posFocus; 
+
+ 	vec4 posFocusSCO = o_posFocus; 
 	vec3 NormSCO = normalize(o_normal_sco);
+
+  //Mar
+  if(DrawWaves==1){
+    // Calcular la normal de las ondas para este fragmento del mar
+    vec3 waveNormal = WaveNormal(vec2(1.0, 1.0), 5.0, o_vertex_sco.xyz, 2.0);
+    waveNormal += WaveNormal(vec2(1.0, 0.5), 2.0, o_vertex_sco.xyz, 2.0);
+    vec3 waveNormalSCO = normalize(vec3(view * vec4(waveNormal, 0.0)));
+    NormSCO = waveNormalSCO;
+  }
 
 	vec4 LSCO = normalize(posFocusSCO - o_vertex_sco);
 	vec3 Ld = Difus(NormSCO, LSCO.xyz, colorFocus);
@@ -120,10 +134,23 @@ void main()
   vec3 Ld3 = vec3(0.0f);
   vec3 Le3 = vec3(0.0f);
   if (cosAngle2 > 0.0) {
-      Ld3 = Difus(NormSCO, LSCO3.xyz, colorLlumFar) * atenuacio2;
-      Le3 = Especular(NormSCO, LSCO3.xyz, o_vertex_sco, colorLlumFar) * atenuacio2;
+    Ld3 = Difus(NormSCO, LSCO3.xyz, colorLlumFar) * atenuacio2;
+    Le3 = Especular(NormSCO, LSCO3.xyz, o_vertex_sco, colorLlumFar) * atenuacio2;
   }
 
-	FragColor = La + Ld + Le + Ld2 + Le2 + Ld3 + Le3;
+  //LlumsVaixell
+  vec3 torchesDiffuse = vec3(0.0f);
+  vec3 torchesSpecular = vec3(0.0f);
+
+  for (int i = 0; i < 6; i++) {
+      vec3 lightDir = normalize(posFocusTorxes[i].xyz - o_vertex_sco.xyz);
+      float distance = length(posFocusTorxes[i].xyz - o_vertex_sco.xyz);
+      float attenuation = distance < 3.0 ? 1.0 : exp(-(distance - 3.0));
+
+      torchesDiffuse += Difus(NormSCO, lightDir, colorLlumsVaixell) * attenuation;
+      torchesSpecular += Especular(NormSCO, lightDir, o_vertex_sco, colorLlumsVaixell) * attenuation;
+  }
+  
+	FragColor = La + Ld + Le + Ld2 + Le2 + Ld3 + Le3 + torchesDiffuse + torchesSpecular;
 }
 

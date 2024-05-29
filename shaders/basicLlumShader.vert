@@ -18,6 +18,9 @@ uniform vec3 llumAmbient;
 uniform vec3 colorLlumFar;
 uniform vec4 posLlumsFarLoc1;
 uniform vec4 posLlumsFarLoc2;
+uniform vec4 posFocusTorxes[6];
+uniform vec3 colorLlumsVaixell;
+uniform int isDrawingSea;
 
 out vec3 fcolor;
 
@@ -31,6 +34,8 @@ out float o_matshin;
 
 //out vec3 o_colorFocus;
 out vec4 o_posFocus;
+
+flat out int DrawWaves;
 
 vec3 Ambient() {
     return llumAmbient * matamb;
@@ -72,6 +77,12 @@ void main()
 {	
 	vec3 La = Ambient();
 	
+  if(isDrawingSea==1 && normal.y>0.0){
+    DrawWaves = 1;
+  } else {
+    DrawWaves = 0;
+  }
+
 	vec3 NormSCO = normalize(NM*normal);
 	vec4 vertSCO = view * TG * vec4 (vertex, 1.0);
 	vec4 LSCO = normalize(posFocusSCO - vertSCO);

@@ -22,13 +22,24 @@ class A3GLWidget : public MyGLWidget
 
   public slots:
     void updateTime(int Time);
+    void updateColorVermell();
+    void updateColorGroc();
+    void updateColorVioleta();
+    void updateColorVerd();
+    void updateTorxa1();
+    void updateTorxa2();
+    void updateTorxa3();
+    void updateTorxa4();
+    void updateTorxa5();
+    void updateTorxa6();
   signals:
 		void setTime(int);
-
 
   private:
     int horaActual = 14;
     float rotacioFar = 0.0;
+    bool estatTorxa[6];
+    glm::vec3 colorLlums = glm::vec3(1.0,1.0,0.0);
 
   public:
     A3GLWidget (QWidget *parent=0);
@@ -41,6 +52,7 @@ class A3GLWidget : public MyGLWidget
     void modelTransformVaixell();
     void solTransform();
     void llumFarTransform();
+    void llumsVaixellTransform();
     void iniEscena ();
     void carregaShaders();
 
@@ -49,6 +61,8 @@ class A3GLWidget : public MyGLWidget
     //--------------------------------------------------------------
     // uniform locations
     GLuint normalMatrixLoc, colorLlumLoc, posLlumLoc, llumAmbientLoc, llumsFarLoc[2], colorLlumFarLoc;
+    GLint isDrawingSeaLoc;
+    GLint llumsVaixellLoc, colorLlumsVaixellLoc;
     //--------------------------------------------------------------
     // Posicions
     glm::vec3 VaixellPos;
