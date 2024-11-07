@@ -43,7 +43,7 @@ Este proyecto es una aplicación gráfica desarrollada con **OpenGL** y **Qt** q
     #compile the code
     make
     #run the program
-    ./nombre-de-tu-ejecutable
+    ./activitat3
     ```
 
 2. **Controles de la UI**:
