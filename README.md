@@ -32,10 +32,6 @@ Este proyecto es una aplicación gráfica desarrollada con **OpenGL** y **Qt** q
     sudo apt install build-essential qt5-default qtbase5-dev libgl1-mesa-dev
     ```
 
-3. **Compila el proyecto**:
-    - Abre el proyecto en **Qt Creator** (se recomienda la versión 5.12 o superior).
-    - Configura el kit de compilación adecuado y compila el proyecto.
-
 ## Uso
 
 1. Ejecuta la aplicación desde la terminal:
